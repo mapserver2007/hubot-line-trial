@@ -4,8 +4,6 @@ lineDefaultEP = 'https://trialbot-api.line.me/v1/events'
 
 class Line extends Adapter
   send: (envelope, strings...) ->
-    appName = process.env.HUBOT_APP_NAME
-    botName = if appName then appName + ' ' else ''
     data = JSON.stringify({
       "to": [envelope.user.name],
       "toChannel": 1383378250,
@@ -13,7 +11,7 @@ class Line extends Adapter
       "content":{
         "contentType": 1,
         "toType": 1,
-        "text": botName + strings.join('\n')
+        "text": strings.join('\n')
       }
     })
     proxyopt = {}
@@ -37,6 +35,10 @@ class Line extends Adapter
     @channelId = process.env.LINE_CHANNEL_ID
     @channelSecret = process.env.LINE_CHANNEL_SECRET
     @channelMid = process.env.LINE_CHANNEL_MID
+    appName = process.env.HUBOT_APP_NAME
+    botName = if appName then appName + ' ' else ''
+    botName = !process.env.HUBOT_APP_NAME ? process.env.HUBOT_APP_NAME + ' '
+
     unless @channelId?
       @robot.logger.emergency "LINE_CHANNEL_ID is required"
       process.exit 1
@@ -47,7 +49,7 @@ class Line extends Adapter
       @robot.logger.emergency "LINE_CHANNEL_MID is required"
       process.exit 1
     @robot.router.post @endpoint, (req, res) =>
-      console.log("callback body: " + JSON.stringify(req.body))
+      @robot.logger.debug "callback body: " + JSON.stringify(req.body)
       # TODO check signature
       results = req.body.result
       for result in results
@@ -62,8 +64,10 @@ class Line extends Adapter
           return
         @robot.logger.debug "from: " + from
         @robot.logger.debug "text: " + text
+        @robot.logger.debug "bot name: " + botName
+
         user = @robot.brain.userForId from, room: 'room'
-        @receive new TextMessage(user, text, 'messageId')
+        @receive new TextMessage(user, botName + text, 'messageId')
         res.send 201
     @emit 'connected'
 
