@@ -4,7 +4,8 @@ lineDefaultEP = 'https://trialbot-api.line.me/v1/events'
 
 class Line extends Adapter
   send: (envelope, strings...) ->
-    botName = !process.env.HUBOT_APP_NAME ? process.env.HUBOT_APP_NAME + ' '
+    appName = process.env.HUBOT_APP_NAME
+    botName = if appName then appName + ' ' else ''
     data = JSON.stringify({
       "to": [envelope.user.name],
       "toChannel": 1383378250,
