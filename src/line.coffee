@@ -4,6 +4,7 @@ lineDefaultEP = 'https://trialbot-api.line.me/v1/events'
 
 class Line extends Adapter
   send: (envelope, strings...) ->
+    botName = !process.env.HUBOT_APP_NAME ? process.env.HUBOT_APP_NAME + ' '
     data = JSON.stringify({
       "to": [envelope.user.name],
       "toChannel": 1383378250,
@@ -11,11 +12,9 @@ class Line extends Adapter
       "content":{
         "contentType": 1,
         "toType": 1,
-        "text": strings.join('\n')
+        "text": botName + strings.join('\n')
       }
     })
-    console.log(data)
-    # using request module to use FIXIE PROXY
     proxyopt = {}
     proxyopt = {'proxy': process.env.FIXIE_URL} if process.env.FIXIE_URL
     customRequest = request.defaults(proxyopt)
@@ -30,12 +29,6 @@ class Line extends Adapter
       body: data
     , (err, response, body) ->
       throw err if err
-      if response.statusCode is 200
-        console.log "success"
-        console.log body
-      else
-        console.log "response error: #{response.statusCode}"
-        console.log body
 
   run: ->
     @endpoint = process.env.HUBOT_ENDPOINT ? '/hubot/incoming'
@@ -58,16 +51,16 @@ class Line extends Adapter
       results = req.body.result
       for result in results
         if result.eventType != "138311609000106303"
-          console.log("EventType is not 'Received message'. Skipping..")
+          @robot.logger.debug "EventType is not 'Received message'. Skipping.."
           res.send 201
           return
         {from, text, contentType} = result.content
         if contentType isnt 1
-          console.log("ContentType is not 'text'. Skipping..")
+          @robot.logger.debug "ContentType is not 'text'. Skipping.."
           res.send 201
           return
-        console.log("from: " + from)
-        console.log("text: " + text)
+        @robot.logger.debug "from: " + from
+        @robot.logger.debug "text: " + text
         user = @robot.brain.userForId from, room: 'room'
         @receive new TextMessage(user, text, 'messageId')
         res.send 201

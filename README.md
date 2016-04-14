@@ -41,6 +41,7 @@ Check `Channel ID`, `Channel Secret`, `MID` on LINE developers page.
   incoming URL of hubot
 * `LINE_ENDPOINT_URL` _default: `https://trialbot-api.line.me/v1/events`_ -
   endpoint for line bot api
+* `HUBOT_APP_NAME` _default: none_ - Your hubot application name
 
 ## Run
 
