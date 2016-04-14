@@ -37,7 +37,6 @@ class Line extends Adapter
     @channelMid = process.env.LINE_CHANNEL_MID
     appName = process.env.HUBOT_APP_NAME
     botName = if appName then appName + ' ' else ''
-    botName = !process.env.HUBOT_APP_NAME ? process.env.HUBOT_APP_NAME + ' '
 
     unless @channelId?
       @robot.logger.emergency "LINE_CHANNEL_ID is required"
